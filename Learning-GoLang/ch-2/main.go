@@ -94,5 +94,11 @@ func main() {
 		y := 20
 
 		const z = x + y -> This will give error because the value of x and y is not known at compile time
+
+
+		const a = 10
+		cont b = 20
+
+		const c = a + b -> This will work because the value of a and b is known at compile time because we have to give value to the constant while decaring the constant. So, it will be sure that value will be available at the compiler time.
 	*/
 }
