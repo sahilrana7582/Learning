@@ -103,14 +103,89 @@ func main() {
 	fmt.Println(len(x3))
 	// Still the length of the slice will remain same as it was before
 
+	/*
+		To slice the slice we can use the following syntac:
+		* slice_name[start_index:end_index]
+		* start_index = the index of the element from where we want to start the slice
+		* end_index = the index of the element till where we want to slice the slice
+		* The end_index is not included in the slice
+		* The start_index is included in the slice
+		For Eg:
+			x := []int{1, 2, 3, 4, 5}
+			y := x[0:3] // This will Return the slice {1, 2}
+			//3 will not included in the slice
+	*/
 	x5 := []int{1, 2, 3, 4, 5}
 	y5 := x5[1:3]
 	fmt.Println(x5)
 	fmt.Println(y5)
-	y5[1] = 101
 
+	/*
+		The Important thing to remember is that:
+		 * If we get the slice from the another slice and then we try to change into the new slice then it will change the original slice
+		 * Same we we will change the new slice then it will also change the original slice as well
+		 As you can see in the following example
+	*/
+	y5[1] = 101 // This will change the original slice as well
 	fmt.Println(x5)
-
 	fmt.Println(y5)
+
+	/*
+		-----------------------------------------------
+			MAPS
+			Now, let talk about the maps:
+			Map is the data structure that will store the data with respect to the key
+			Map is the collection of key-value pair
+
+			There are three ways to define the maps:
+			* var map_name [Key_Name]Type_of_Value_You_Want_To_Store
+				-> Type can be any type like int, string, float, bool, etc.
+			* map_name := map[Key_Name_Type]Type_of_Value_You_Want_To_Store{}
+			* map_name := map[Key_Name_Type]Type_Of_Value_You_Want_To_Store{
+				Key_Name_1 : value_1,
+				Key_Name_2 : value_2,
+				Key_Name_3 : value_3,
+			}
+	*/
+
+	mpp := map[string]int{
+		"Sahil": 999,
+		"King":  79,
+	}
+
+	fmt.Println(mpp)
+
+	//How to access the data from the the map
+	// map_name[Key_Name] -> This will return the data assigned to the key
+	fmt.Println(mpp["Sahil"])
+
+	//How to add new value to the map
+	// map_name[New_Key_Name_You_Want_To_Add] = value_OR_data_you_want_to_store
+	mpp["New_Data"] = 1001
+	fmt.Println(mpp["New_Data"])
+
+	/*
+		Comma Ok Idiom
+		-> It is used to check whether the key is present in the map or not
+
+		Syntax of the this is below:
+			* value, ok := map_name[Key_Name]
+			//  For value --> If the value is present in the map then it will return the value and if the value is not presemt in the map then it will return 0
+			//  For Ok --> If the key is present in the map then i will return the true and if the key is not present in the map then  it will return false.
+	*/
+
+	value, ok := mpp["Sahil"]
+
+	// Value will be the value assigned to the key Sahil
+	// Ok will be true as Sahil is present in the map
+
+	fmt.Println(value, ok)
+
+	value, ok = mpp["Sahil1"]
+
+	// Value will be the 0 as this value is not present in the map
+	// Ok will be the false as this key is not present in the map
+
+	fmt.Println(value, ok)
 
 }
