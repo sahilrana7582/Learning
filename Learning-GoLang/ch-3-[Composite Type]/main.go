@@ -103,4 +103,14 @@ func main() {
 	fmt.Println(len(x3))
 	// Still the length of the slice will remain same as it was before
 
+	x5 := []int{1, 2, 3, 4, 5}
+	y5 := x5[1:3]
+	fmt.Println(x5)
+	fmt.Println(y5)
+	y5[1] = 101
+
+	fmt.Println(x5)
+
+	fmt.Println(y5)
+
 }
