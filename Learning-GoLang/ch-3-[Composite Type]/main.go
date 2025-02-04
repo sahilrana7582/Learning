@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"maps"
+)
 
 func main() {
 
@@ -187,5 +190,41 @@ func main() {
 	// Ok will be the false as this key is not present in the map
 
 	fmt.Println(value, ok)
+
+	/*
+		Deleting th keys from the map
+		-> we can use delete() function to delete the key from the map
+		-> Syntax of the delete() function is below:
+		delete(map_name, key_name)
+		-> This function will take two arguments:
+		-> First argument is the map name from where we want to delete the key
+		-> Second argument is the key name that we want to delete from the map
+	*/
+
+	delete(mpp, "Sahil")
+	value, ok = mpp["Sahil"]
+	// Value will be the 0 as we delete this value and ok will be false.
+	fmt.Println(value, ok) // Output : 0 false
+
+	// We Can also empty the map with the help of the another built-in function clear(map_name)
+	// It will take the map_name  as the argument which we will want to empty
+	clear(mpp)
+
+	fmt.Println(mpp) // Output : mpp[]
+	// The Map will become empty
+
+	// We can also check if the two maps are equal or not with the help of one other built-in function
+	/*
+		maps.equal(map_name_1, map_name_2)
+		-> This function will return the  boolean valu
+		-> This will take the two maps as the arguments and check theirs keys and values to each other
+		-> If every value and key of these two maps are equal and identical then it will return the true otherwise it will return false
+	*/
+
+	mpp1 := map[string]int{}
+
+	fmt.Println(maps.Equal(mpp, mpp1))
+	// Output : true
+	// As both the maps are empty at a moment
 
 }
