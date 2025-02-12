@@ -1,0 +1,48 @@
+What is NestJS?
+NestJs is a NodeJs Framework for building Server-Side Applications. These Applications are more reliable, scalable, and testable.
+
+NestJS is combination of Typescript, nodeJs.
+
+
+
+
+Why we need nestjs?
+NodeJs is just simple javascript runtime environment.
+NodeJs Applications has not structure.So, as a developer we have to decide what kind of structure we want to use.
+
+
+
+
+Why NestJS is better than NodeJS?
+
+1. Better Applciation Structure: When we have very big team of developers, then it is very difficult to maintain code. But with the help of the NestJs EcoSystem,
+We can organize our code in a better way.
+
+2. Better Consistency: As NestJs has better code structure, it is easy to maintian code, find and solve bugs.
+
+
+
+
+Out of the feature of NESTJS?
+1. Routing
+2. Testing
+3. Middleware
+4. Expection Handling
+5. Better Documentation
+6. Plugins
+
+
+
+For I/O operations we use: Express, Fastify
+Class Validation: Class-validator. For Validating incoming Req
+Jest: For Testing
+ORM: TypeORM
+
+
+
+How to Install NESTJS CLI..?
+npm i -g @nestjs/cli -> This will install NestJS CLI Globally.
+nest new project-name -> This will create a new NestJS project
+
+
+
