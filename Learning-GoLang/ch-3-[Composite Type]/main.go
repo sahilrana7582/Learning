@@ -227,4 +227,8 @@ func main() {
 	// Output : true
 	// As both the maps are empty at a moment
 
+	func(val int) {
+		fmt.Println(val)
+	}(10)
+
 }
