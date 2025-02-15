@@ -47,7 +47,7 @@ func main() {
 		p.name = name
 		fmt.Printf("Updated Name: %s", p.name)
 
-		This way we can change the original value of the receiver.
+		This way we can change the original value of the receiver. This is called Pointer Receiver.ss
 	}
 */
 
