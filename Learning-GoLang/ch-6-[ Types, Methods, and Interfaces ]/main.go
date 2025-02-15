@@ -2,10 +2,25 @@ package main
 
 import "fmt"
 
+/*
+	Embedded Struct
+	When we want to use the same struct in other structs, we can embedded one struct into another.
+
+	See The Below Example:
+*/
+
+type Address struct {
+	street     string
+	city       string
+	country    string
+	postalCode int
+}
+
 type Pesrons struct {
 	firstName string
 	lastName  string
 	age       int
+	Address   // Now The Struct Person also has all the fields of the Address struct.
 }
 
 /*
@@ -26,6 +41,12 @@ func main() {
 		firstName: "Sahil",
 		lastName:  "Rana",
 		age:       23,
+		Address: Address{
+			street:     "123 Garhshankar",
+			city:       "Jalandhar",
+			country:    "India",
+			postalCode: 144001,
+		},
 	}
 	sahil.personInfo()
 	sahil.updateName("King", "Thakur")
@@ -34,6 +55,9 @@ func main() {
 	sahil.updateNameCopy(24)
 	fmt.Println(sahil.age)
 	// Output : 23
+
+	fmt.Println(sahil.Address.city)
+	// Output : Jalandhar
 
 }
 
