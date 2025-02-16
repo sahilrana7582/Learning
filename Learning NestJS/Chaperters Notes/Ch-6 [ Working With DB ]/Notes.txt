@@ -1,0 +1,114 @@
+We Will Use ORM to work with DB.
+
+What is ORM?
+ORM is Object Relational Mapping. 
+It is a tool that allows us to interact with the databases using the objects and classes.
+
+For Example:
+
+In PostGresSql:
+Select * from users; --> This is SQL Query which will return all the data (users) from the users table.
+
+In ORM:
+const users = await this.users.find(); --> This will return all the data (users) from the users table.
+
+
+In ORM we don't need to write SQL Query, we can use the methods to interact with the database.
+
+For The NestJS We Will Use TypeORM.
+TypeORM is a TypeScript ORM that allows you to interact with databases using TypeScript classes.
+
+
+
+How to install TypeORM?
+"npm install typeorm @nestjs/typeorm" --> Run this command to install TypeORM and NestJS TypeORM.
+
+Now, we have to decide which database we will use.
+for this example we will use PostgresSQL.
+
+Intall PostgresSQL: "npm install pg" --> Run this command to install PostgresSQL.
+
+
+Now, direct back to the NestJS projetc and inside the app.module.ts file we have to configure the TypeORM.
+
+How to configure and connect to the database?
+
+import { TypeOrmModule } from '@nestjs/typeorm'; --> Import the TypeORM module.
+
+
+Now, we have to provide the typeORM in the imports array.
+
+typeORMModule.forRoot({}) -> It will take the object which will have the configuration of the database.
+@module({
+    imports: [ TypeORM.forRoot({
+        type: 'postgres',    // Type of the database
+        host: 'localhost',   // Host of the database
+        port: 5432,          // Port of the database
+        username: 'postgres',// Username of the database
+        password: '1234',    // Password of the database
+        database: 'blog',    // Name of the database
+        entities: [],        // Entities of the database
+        synchronize: true,    // Synchronize the database
+    })]
+})
+
+Be Careful: Synchronize is only for the development environment.
+
+What is synchronize?
+Synchronize is a property that allows us to synchronize the database schema with the entities.
+It means that it will create the entire database from the scratch every time we run the application.
+
+
+Using Async Configuration:
+We have to use the async configuration for the database configuration.
+Why: because with the async configuration we can use the environment variables directly in our database configuration object.
+For Example:
+
+@module({
+    imports: [TypeOrmModule.forRootAsync({
+        useFactory: (configService: ConfigService) => ({
+            type: 'postgres',
+            host: configService.get('DB_HOST'),
+            port: configService.get('DB_PORT'),
+            username: configService.get('DB_USERNAME'),
+            password: configService.get('DB_PASSWORD'),
+            database: configService.get('DB_NAME'),
+        })
+    })]
+})
+
+useFactory(()=>{}) ----> This take the function as an argument and return the configuration object.
+
+
+
+
+Now, we have to create the entity.
+
+What is entity?
+Entity is nothin but class which is mapped to the table in the database.
+For Example:
+
+User.entity.ts => This will be set as the table in the database.
+Entity is nothing but the file which contains all the columns information about the tables in the database.
+It also contains all the properties of the table.
+
+Remember: Entity is nothing but the class which is mapped to the table in the database. It is the file which contains all the columns of the table in the database.
+
+
+
+
+Diagram of the user entity:
+
+user.entity.ts --------> usersRepository.ts + users.service.ts --------> database
+
+user.entity.ts: File which contains all the columns information about the table in the database.
+database: It is the database where the data will be stored.
+usersRepository.ts: It is the file which contains all the methods and functions to interact with the database.
+users.service.ts: It is the file which contains all the business logic to interact with the database.
+
+
+
+
+
+
+
