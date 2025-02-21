@@ -103,14 +103,33 @@ func main() {
 	go writeOnlyChannels(ch1)
 
 	time.Sleep(time.Second * 1)
-	go readOnlyChannels(ch1)
-	time.Sleep(time.Second * 1)
+	// go readOnlyChannels(ch1)
+
+	for val := range ch1 {
+		fmt.Println(val)
+
+		// Comment the line in writeOnlyChannels close(ch1) function to see the error
+		// it will give an error because with range for loop will keep iterating on the channel looking for the next value
+		// So, after iterating on the channel it will try read the value from the channel but there is no value in the channel
+		// so, it will give an error.
+		// So, we have to close the channel after we are done with the channel.
+		// close(ch1)
+		// this way with range loop the channel will know that the channel is closed and it will not try to read further values from the channel.
+	}
+
+	// for len(ch) > 0 {
+	// 	fmt.Println(<-ch + " | <- Read Only Channel")
+	// it is not the case with for loop because for loop will iterate on the channel and it will not try to read the value from the channel.
+	// }
 
 }
 
 func readOnlyChannels(ch <-chan string) {
 	for len(ch) > 0 {
 		fmt.Println(<-ch + " | <- Read Only Channel")
+		// ch <- "Hello From Read Only Channel"
+		// uncomment this line to see the error
+		// because we can't write to a read only channel
 	}
 }
 
@@ -118,5 +137,10 @@ func writeOnlyChannels(ch chan<- string) {
 	for i := 0; i < 5; i++ {
 		ch <- "Hello From | -> " + strconv.Itoa(i)
 		fmt.Println("Hello From Write Only Channel")
+
+		// fmt.Print(<-ch)
+		// uncomment this line to see the error
+		// because we can't read from a write only channel
 	}
+	close(ch)
 }
