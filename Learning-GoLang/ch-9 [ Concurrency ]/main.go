@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strconv"
 	"time"
 )
 
@@ -21,6 +22,10 @@ func printHello(text string) {
 }
 
 func main() {
+
+	fmt.Println("--------------------- Go Routines ---------------------")
+	fmt.Println("")
+	fmt.Println("")
 
 	// go function function_name()
 	// With the help go keyword in front of the function we can make the new go routine or we can say that function
@@ -65,6 +70,53 @@ func main() {
 
 	ch := make(chan string, 5)
 
-	// Now, we can store 5 data in this channel.
+	fmt.Println("")
+	fmt.Println("")
+	fmt.Println("")
+	fmt.Println("")
 
+	fmt.Println("--------------------- Channel ---------------------")
+	fmt.Println("")
+	fmt.Println("")
+
+	// Now, we can store 5 data in this channel.
+	// how to send the data to the channel?
+	// channel_name <- data -> This way we can send the data to the channel.
+	// How to receive the data from the channel?
+	// data := <- channel_name -> This way we can receive the data from the channel.
+
+	ch <- "Hello From the Channel"
+
+	fmt.Println(<-ch)
+	// Output: Hello From the Channel
+
+	// Things to remember:
+	// 1. A single go routine rarely use both operations of sending and receiving data with the same channel.
+	// 2. So, we have to make our channel readFromChannel and writeToChannel as separate go routines.
+
+	// While passing channels as parameters, we have to pass them as pointers.
+	// function_nam(channel_name <- chan type) -> This was we can pass the channel as a read only channel.
+	// function_nam(channel_name chan <- type) -> This was we can pass the channel as a write only channel.
+
+	ch1 := make(chan string, 5)
+
+	go writeOnlyChannels(ch1)
+
+	time.Sleep(time.Second * 1)
+	go readOnlyChannels(ch1)
+	time.Sleep(time.Second * 1)
+
+}
+
+func readOnlyChannels(ch <-chan string) {
+	for len(ch) > 0 {
+		fmt.Println(<-ch + " | <- Read Only Channel")
+	}
+}
+
+func writeOnlyChannels(ch chan<- string) {
+	for i := 0; i < 5; i++ {
+		ch <- "Hello From | -> " + strconv.Itoa(i)
+		fmt.Println("Hello From Write Only Channel")
+	}
 }
