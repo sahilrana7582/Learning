@@ -9,11 +9,12 @@ import (
 func (app *applicaton) healthcheckHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 
-	app.logger.Println(`{"status": "available"}`)
-	app.logger.Printf("environment: %s", app.config.env)
-	app.logger.Printf("version: %s", version)
-	app.logger.Printf("port: %d", app.config.port)
-	app.logger.Printf("time: %s", time.Now().Format(time.RFC3339))
+	fmt.Fprintf(w, "status: %s\n", http.StatusText(http.StatusOK))
+	fmt.Fprintf(w, "environment: %s\n", app.config.env)
+	fmt.Fprintf(w, "date: %s\n", time.Now().Format(time.RFC3339))
+	fmt.Fprintf(w, "version: %s\n", version)
+	fmt.Fprintf(w, "port: %d\n", app.config.port)
+	fmt.Fprintf(w, "uptime: %s\n", time.Since(time.Now().Add(-time.Hour)))
+	w.Header().Set("Content-Type", "application/json")
 
-	fmt.Fprint(w, `{"status": "available"}`)
 }
