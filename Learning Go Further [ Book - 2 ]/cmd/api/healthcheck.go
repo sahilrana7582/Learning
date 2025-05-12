@@ -7,14 +7,19 @@ import (
 )
 
 func (app *applicaton) healthcheckHandler(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusOK)
 
-	fmt.Fprintf(w, "status: %s\n", http.StatusText(http.StatusOK))
-	fmt.Fprintf(w, "environment: %s\n", app.config.env)
-	fmt.Fprintf(w, "date: %s\n", time.Now().Format(time.RFC3339))
-	fmt.Fprintf(w, "version: %s\n", version)
-	fmt.Fprintf(w, "port: %d\n", app.config.port)
-	fmt.Fprintf(w, "uptime: %s\n", time.Since(time.Now().Add(-time.Hour)))
+	resp := `{
+		"status": "success",
+		"environment": %q,
+		"version": %q,
+		"timestamp": %q,
+		}`
+
+	resp = fmt.Sprintf(resp, app.config.env, version, time.Now().Format(time.RFC3339))
 	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(resp))
+	app.logger.Println("Healthcheck request received")
+	app.logger.Println("Healthcheck response sent")
 
 }

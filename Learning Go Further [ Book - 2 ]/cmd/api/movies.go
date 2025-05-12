@@ -3,9 +3,6 @@ package main
 import (
 	"fmt"
 	"net/http"
-	"strconv"
-
-	"github.com/julienschmidt/httprouter"
 )
 
 func (app *applicaton) createNewMovieHandler(w http.ResponseWriter, r *http.Request) {
@@ -22,9 +19,7 @@ func (app *applicaton) getMovieHandler(w http.ResponseWriter, r *http.Request) {
 
 func (app *applicaton) getMovieById(w http.ResponseWriter, r *http.Request) {
 
-	params := httprouter.ParamsFromContext(r.Context())
-
-	id, err := strconv.ParseInt(params.ByName("id"), 10, 64)
+	id, err := app.readIdParamFromRequest(r)
 	if err != nil {
 		app.logger.Println("Invalid movie ID")
 		http.Error(w, "Invalid movie ID", http.StatusBadRequest)
