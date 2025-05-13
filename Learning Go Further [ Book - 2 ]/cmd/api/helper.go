@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"net/http"
 	"strconv"
 
@@ -15,4 +16,21 @@ func (app *applicaton) readIdParamFromRequest(r *http.Request) (int64, error) {
 		return 0, err
 	}
 	return id, nil
+}
+
+func (app *applicaton) writeJson(w http.ResponseWriter, status int, data interface{}, headers http.Header) error {
+	js, err := json.Marshal(data)
+	if err != nil {
+		app.logger.Println("Error marshalling JSON:", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return err
+	}
+
+	for key, value := range headers {
+		w.Header()[key] = value
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+	w.Write(js)
+	return nil
 }

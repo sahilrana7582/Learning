@@ -1,25 +1,23 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
 	"time"
 )
 
 func (app *applicaton) healthcheckHandler(w http.ResponseWriter, r *http.Request) {
 
-	resp := `{
-		"status": "success",
-		"environment": %q,
-		"version": %q,
-		"timestamp": %q,
-		}`
+	data := map[string]string{
+		"status":  "available",
+		"env":     app.config.env,
+		"version": version,
+		"time":    time.Now().Format("2006-01-02 15:04:05"),
+	}
 
-	resp = fmt.Sprintf(resp, app.config.env, version, time.Now().Format(time.RFC3339))
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(resp))
-	app.logger.Println("Healthcheck request received")
-	app.logger.Println("Healthcheck response sent")
-
+	err := app.writeJson(w, http.StatusOK, data, nil)
+	if err != nil {
+		app.logger.Println("Error writing JSON response:", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
 }

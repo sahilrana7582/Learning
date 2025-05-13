@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"net/http"
+
+	"github.com/sahilrana7582/Learning/internal/data"
 )
 
 func (app *applicaton) createNewMovieHandler(w http.ResponseWriter, r *http.Request) {
@@ -25,7 +27,26 @@ func (app *applicaton) getMovieById(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid movie ID", http.StatusBadRequest)
 		return
 	}
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	fmt.Fprintf(w, `{"status": "success", "message": "Movie with ID %d retrieved successfully"}`, id)
+
+	movieData := data.Movie{
+		ID:       id,
+		Title:    "Inception",
+		Year:     2010,
+		Runtime:  148,
+		Genre:    []string{"Action", "Sci-Fi"},
+		Director: "Christopher Nolan",
+		Actors:   []string{"Leonardo DiCaprio", "Joseph Gordon-Levitt"},
+		Plot:     "A thief who steals corporate secrets through the use of dream-sharing technology is given the inverse task of planting an idea into the mind of a CEO.",
+		Language: "English",
+		Country:  "USA",
+		Awards:   "Oscar, BAFTA",
+	}
+
+	err = app.writeJson(w, http.StatusOK, movieData, nil)
+	if err != nil {
+		app.logger.Println("Error writing JSON response:", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
 }
