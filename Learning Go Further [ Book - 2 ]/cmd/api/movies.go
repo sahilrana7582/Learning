@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -8,9 +9,27 @@ import (
 )
 
 func (app *applicaton) createNewMovieHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
+
+	var movieData data.Movie
+	decoder := json.NewDecoder(r.Body)
+	err := decoder.Decode(&movieData)
+	if err != nil {
+		app.logger.Println("Error decoding JSON:", err)
+		http.Error(w, "Invalid request payload", http.StatusBadRequest)
+		return
+	}
+	defer r.Body.Close()
+	movieData.ID = 1
+	err = app.writeJson(w, http.StatusCreated, movieData, nil)
+	if err != nil {
+		app.logError(r, err)
+		app.serverErrorResponse(w, r, err)
+		return
+	}
 	w.WriteHeader(http.StatusCreated)
-	fmt.Fprintf(w, `{"status": "success", "message": "Movie created successfully"}`)
+	fmt.Fprintf(w, `{"status": "success", "message": "Movie created successfully", "movie_id": %d}`, movieData.ID)
+	app.logger.Println("Movie created successfully", movieData)
+
 }
 
 func (app *applicaton) getMovieHandler(w http.ResponseWriter, r *http.Request) {
@@ -44,9 +63,8 @@ func (app *applicaton) getMovieById(w http.ResponseWriter, r *http.Request) {
 
 	err = app.writeJson(w, http.StatusOK, movieData, nil)
 	if err != nil {
-		app.logger.Println("Error writing JSON response:", err)
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		return
+		app.logError(r, err)
+		app.serverErrorResponse(w, r, err)
 	}
 
 }

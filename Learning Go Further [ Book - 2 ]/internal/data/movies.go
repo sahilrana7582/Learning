@@ -11,5 +11,5 @@ type Movie struct {
 	Plot     string   `json:"plot"`
 	Language string   `json:"language"`
 	Country  string   `json:"country"`
-	Awards   string   `json:"awards"`
+	Awards   string   `json:"awards,omitempty"`
 }
