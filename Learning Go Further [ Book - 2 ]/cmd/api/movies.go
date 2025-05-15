@@ -6,10 +6,10 @@ import (
 	"net/http"
 
 	"github.com/sahilrana7582/Learning/internal/data"
+	"github.com/sahilrana7582/Learning/internal/validator"
 )
 
 func (app *applicaton) createNewMovieHandler(w http.ResponseWriter, r *http.Request) {
-
 	var movieData data.Movie
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(&movieData)
@@ -19,17 +19,25 @@ func (app *applicaton) createNewMovieHandler(w http.ResponseWriter, r *http.Requ
 		return
 	}
 	defer r.Body.Close()
+
+	// ✅ Validate before sending any response
+	if v := validator.ValidateMovieInput(movieData); !v.Valid() {
+		app.logger.Println("Validation error:", v.Errors)
+		app.errorResponse(w, r, http.StatusUnprocessableEntity, v.Errors)
+		return
+	}
+
 	movieData.ID = 1
+
 	err = app.writeJson(w, http.StatusCreated, movieData, nil)
 	if err != nil {
 		app.logError(r, err)
 		app.serverErrorResponse(w, r, err)
 		return
 	}
+
 	w.WriteHeader(http.StatusCreated)
 	fmt.Fprintf(w, `{"status": "success", "message": "Movie created successfully", "movie_id": %d}`, movieData.ID)
-	app.logger.Println("Movie created successfully", movieData)
-
 }
 
 func (app *applicaton) getMovieHandler(w http.ResponseWriter, r *http.Request) {
