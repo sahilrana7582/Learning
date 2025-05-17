@@ -20,8 +20,9 @@ func (app *applicaton) createNewMovieHandler(w http.ResponseWriter, r *http.Requ
 	}
 	defer r.Body.Close()
 
-	// ✅ Validate before sending any response
-	if v := validator.ValidateMovieInput(movieData); !v.Valid() {
+	v := validator.New()
+
+	if v := validator.ValidateMovieInput(v, movieData); !v.Valid() {
 		app.logger.Println("Validation error:", v.Errors)
 		app.errorResponse(w, r, http.StatusUnprocessableEntity, v.Errors)
 		return

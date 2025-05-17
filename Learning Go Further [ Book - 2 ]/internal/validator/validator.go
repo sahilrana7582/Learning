@@ -115,8 +115,7 @@ func AllNotBlank(items []string) bool {
 	return true
 }
 
-func ValidateMovieInput(movie data.Movie) *Validator {
-	v := New()
+func ValidateMovieInput(v *Validator, movie data.Movie) *Validator {
 
 	v.Check(NotBlank(movie.Title), "title", "must not be blank")
 	v.Check(MinLength(movie.Title, 2), "title", "must be at least 2 characters long")
