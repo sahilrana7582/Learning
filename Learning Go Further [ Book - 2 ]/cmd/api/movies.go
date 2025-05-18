@@ -2,17 +2,16 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/sahilrana7582/Learning/internal/data"
 	"github.com/sahilrana7582/Learning/internal/validator"
 )
 
-func (app *applicaton) createNewMovieHandler(w http.ResponseWriter, r *http.Request) {
+func (app *application) createNewMovieHandler(w http.ResponseWriter, r *http.Request) {
 	var movieData data.Movie
-	decoder := json.NewDecoder(r.Body)
-	err := decoder.Decode(&movieData)
+
+	err := json.NewDecoder(r.Body).Decode(&movieData)
 	if err != nil {
 		app.logger.Println("Error decoding JSON:", err)
 		http.Error(w, "Invalid request payload", http.StatusBadRequest)
@@ -21,59 +20,128 @@ func (app *applicaton) createNewMovieHandler(w http.ResponseWriter, r *http.Requ
 	defer r.Body.Close()
 
 	v := validator.New()
-
 	if v := validator.ValidateMovieInput(v, movieData); !v.Valid() {
 		app.logger.Println("Validation error:", v.Errors)
 		app.errorResponse(w, r, http.StatusUnprocessableEntity, v.Errors)
 		return
 	}
 
-	movieData.ID = 1
-
-	err = app.writeJson(w, http.StatusCreated, movieData, nil)
+	err = app.models.Movies.Insert(&movieData)
 	if err != nil {
-		app.logError(r, err)
 		app.serverErrorResponse(w, r, err)
 		return
 	}
 
-	w.WriteHeader(http.StatusCreated)
-	fmt.Fprintf(w, `{"status": "success", "message": "Movie created successfully", "movie_id": %d}`, movieData.ID)
+	resp := map[string]interface{}{
+		"status":   "success",
+		"message":  "Movie created successfully",
+		"movie_id": movieData.ID,
+	}
+
+	err = app.writeJson(w, http.StatusCreated, resp, nil)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+	}
 }
 
-func (app *applicaton) getMovieHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	fmt.Fprintf(w, `{"status": "success", "message": "Movie retrieved successfully"}`)
+func (app *application) getMovieHandler(w http.ResponseWriter, r *http.Request) {
+	movies, err := app.models.Movies.GetAll()
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+
+	err = app.writeJson(w, http.StatusOK, movies, nil)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+	}
 }
 
-func (app *applicaton) getMovieById(w http.ResponseWriter, r *http.Request) {
-
+func (app *application) getMovieById(w http.ResponseWriter, r *http.Request) {
 	id, err := app.readIdParamFromRequest(r)
 	if err != nil {
-		app.logger.Println("Invalid movie ID")
+		app.logger.Println("Invalid movie ID:", err)
 		http.Error(w, "Invalid movie ID", http.StatusBadRequest)
 		return
 	}
 
-	movieData := data.Movie{
-		ID:       id,
-		Title:    "Inception",
-		Year:     2010,
-		Runtime:  148,
-		Genre:    []string{"Action", "Sci-Fi"},
-		Director: "Christopher Nolan",
-		Actors:   []string{"Leonardo DiCaprio", "Joseph Gordon-Levitt"},
-		Plot:     "A thief who steals corporate secrets through the use of dream-sharing technology is given the inverse task of planting an idea into the mind of a CEO.",
-		Language: "English",
-		Country:  "USA",
-		Awards:   "Oscar, BAFTA",
+	movie, err := app.models.Movies.Get(id)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
 	}
 
-	err = app.writeJson(w, http.StatusOK, movieData, nil)
+	err = app.writeJson(w, http.StatusOK, movie, nil)
 	if err != nil {
-		app.logError(r, err)
 		app.serverErrorResponse(w, r, err)
 	}
+}
 
+func (app *application) updateMovieHandler(w http.ResponseWriter, r *http.Request) {
+	id, err := app.readIdParamFromRequest(r)
+	if err != nil {
+		app.logger.Println("Invalid movie ID:", err)
+		http.Error(w, "Invalid movie ID", http.StatusBadRequest)
+		return
+	}
+
+	var movieData data.Movie
+	err = json.NewDecoder(r.Body).Decode(&movieData)
+	if err != nil {
+		app.logger.Println("Error decoding JSON:", err)
+		http.Error(w, "Invalid request payload", http.StatusBadRequest)
+		return
+	}
+	defer r.Body.Close()
+
+	// Validate input
+	v := validator.New()
+	if v := validator.ValidateMovieInput(v, movieData); !v.Valid() {
+		app.logger.Println("Validation error:", v.Errors)
+		app.errorResponse(w, r, http.StatusUnprocessableEntity, v.Errors)
+		return
+	}
+
+	movieData.ID = id // ensure path ID and payload ID match
+
+	err = app.models.Movies.Update(&movieData)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+
+	resp := map[string]interface{}{
+		"status":  "success",
+		"message": "Movie updated successfully",
+	}
+
+	err = app.writeJson(w, http.StatusOK, resp, nil)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+	}
+}
+
+func (app *application) deleteMovieHandler(w http.ResponseWriter, r *http.Request) {
+	id, err := app.readIdParamFromRequest(r)
+	if err != nil {
+		app.logger.Println("Invalid movie ID:", err)
+		http.Error(w, "Invalid movie ID", http.StatusBadRequest)
+		return
+	}
+
+	err = app.models.Movies.Delete(id)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+
+	resp := map[string]interface{}{
+		"status":  "success",
+		"message": "Movie deleted successfully",
+	}
+
+	err = app.writeJson(w, http.StatusOK, resp, nil)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+	}
 }

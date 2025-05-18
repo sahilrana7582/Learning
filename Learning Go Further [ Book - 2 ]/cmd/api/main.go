@@ -7,6 +7,9 @@ import (
 	"net/http"
 	"os"
 	"time"
+
+	"github.com/sahilrana7582/Learning/internal/data"
+	"github.com/sahilrana7582/Learning/internal/db"
 )
 
 const version = "1.0.0"
@@ -16,9 +19,10 @@ type config struct {
 	env  string
 }
 
-type applicaton struct {
+type application struct {
 	config config
 	logger *log.Logger
+	models *data.Models
 }
 
 func main() {
@@ -30,13 +34,28 @@ func main() {
 
 	logger := log.New(os.Stdout, "[info]", log.Ldate|log.Ltime|log.Lshortfile)
 
-	app := &applicaton{
-		config: cfg,
-		logger: logger,
+	cfg2 := db.DBConfig{
+		Host:     "localhost",
+		Port:     5432,
+		User:     "postgres",
+		Password: "1234",
+		DBName:   "go_movies_db",
+		SSLMode:  "disable",
 	}
 
-	mux := http.NewServeMux()
-	mux.HandleFunc("/v1/healthcheck", app.healthcheckHandler)
+	// Initialize the database connection
+	database, err := db.NewDB(cfg2)
+	if err != nil {
+		log.Fatalf("DB connection failed: %v", err)
+	}
+	defer database.Close()
+	logger.Printf("database connection pool established")
+
+	app := &application{
+		config: cfg,
+		logger: logger,
+		models: data.NewModal(database),
+	}
 
 	srv := &http.Server{
 		Addr:         fmt.Sprintf(":%d", app.config.port),
@@ -47,7 +66,7 @@ func main() {
 	}
 
 	logger.Printf("Starting %s server on port %d", app.config.env, app.config.port)
-	err := srv.ListenAndServe()
+	err = srv.ListenAndServe()
 	if err != nil {
 		logger.Fatal(err)
 	}

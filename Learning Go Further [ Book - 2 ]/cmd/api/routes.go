@@ -6,17 +6,16 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-func (app *applicaton) routes() *httprouter.Router {
+func (app *application) routes() *httprouter.Router {
 
-	// New Router Instance
 	router := httprouter.New()
-
-	// Add All The Routes Here and Its Handlers
 
 	router.HandlerFunc(http.MethodGet, "/v1/healthcheck", app.healthcheckHandler)
 	router.HandlerFunc(http.MethodGet, "/v1/movies/:id", app.getMovieById)
 	router.HandlerFunc(http.MethodPost, "/v1/movies", app.createNewMovieHandler)
 	router.HandlerFunc(http.MethodGet, "/v1/movies", app.getMovieHandler)
+	router.HandlerFunc(http.MethodPut, "/v1/movies/:id", app.updateMovieHandler)
+	router.HandlerFunc(http.MethodDelete, "/v1/movies/:id", app.deleteMovieHandler)
 
 	return router
 }

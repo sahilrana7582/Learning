@@ -1,0 +1,9 @@
+ALTER TABLE movies DROP CONSTRAINT IF EXISTS movies_release_year_check;
+ALTER TABLE movies DROP CONSTRAINT IF EXISTS movies_runtime_check;
+ALTER TABLE movies DROP CONSTRAINT IF EXISTS movies_genre_check;
+ALTER TABLE movies DROP CONSTRAINT IF EXISTS movies_actors_check;
+ALTER TABLE movies DROP CONSTRAINT IF EXISTS movies_language_check;
+ALTER TABLE movies DROP CONSTRAINT IF EXISTS movies_country_check;
+ALTER TABLE movies DROP CONSTRAINT IF EXISTS movies_awards_check;
+ALTER TABLE movies DROP CONSTRAINT IF EXISTS movies_title_check;
+ALTER TABLE movies DROP CONSTRAINT IF EXISTS movies_director_check;
