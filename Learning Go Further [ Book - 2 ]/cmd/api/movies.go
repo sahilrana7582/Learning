@@ -85,8 +85,28 @@ func (app *application) updateMovieHandler(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	var movieData data.Movie
-	err = json.NewDecoder(r.Body).Decode(&movieData)
+	// Step 1: Fetch existing movie
+	movie, err := app.models.Movies.Get(id)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+
+	// Step 2: Parse request body with optional fields
+	var input struct {
+		Title    *string   `json:"title"`
+		Year     *int      `json:"release_year"`
+		Runtime  *int      `json:"runtime"`
+		Genre    *[]string `json:"genre"`
+		Director *string   `json:"director"`
+		Actors   *[]string `json:"actors"`
+		Plot     *string   `json:"plot"`
+		Language *string   `json:"language"`
+		Country  *string   `json:"country"`
+		Awards   *string   `json:"awards"`
+	}
+
+	err = json.NewDecoder(r.Body).Decode(&input)
 	if err != nil {
 		app.logger.Println("Error decoding JSON:", err)
 		http.Error(w, "Invalid request payload", http.StatusBadRequest)
@@ -94,17 +114,48 @@ func (app *application) updateMovieHandler(w http.ResponseWriter, r *http.Reques
 	}
 	defer r.Body.Close()
 
-	// Validate input
+	// Step 3: Apply updates to existing movie
+	if input.Title != nil {
+		movie.Title = *input.Title
+	}
+	if input.Year != nil {
+		movie.Year = *input.Year
+	}
+	if input.Runtime != nil {
+		movie.Runtime = *input.Runtime
+	}
+	if input.Genre != nil {
+		movie.Genre = *input.Genre
+	}
+	if input.Director != nil {
+		movie.Director = *input.Director
+	}
+	if input.Actors != nil {
+		movie.Actors = *input.Actors
+	}
+	if input.Plot != nil {
+		movie.Plot = *input.Plot
+	}
+	if input.Language != nil {
+		movie.Language = *input.Language
+	}
+	if input.Country != nil {
+		movie.Country = *input.Country
+	}
+	if input.Awards != nil {
+		movie.Awards = *input.Awards
+	}
+
+	// Step 4: Validate full movie
 	v := validator.New()
-	if v := validator.ValidateMovieInput(v, movieData); !v.Valid() {
-		app.logger.Println("Validation error:", v.Errors)
-		app.errorResponse(w, r, http.StatusUnprocessableEntity, v.Errors)
+	if valid := validator.ValidateMovieInput(v, *movie); !valid.Valid() {
+		app.logger.Println("Validation error:", valid.Errors)
+		app.errorResponse(w, r, http.StatusUnprocessableEntity, valid.Errors)
 		return
 	}
 
-	movieData.ID = id // ensure path ID and payload ID match
-
-	err = app.models.Movies.Update(&movieData)
+	// Step 5: Update movie
+	err = app.models.Movies.Update(movie)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 		return
@@ -114,7 +165,6 @@ func (app *application) updateMovieHandler(w http.ResponseWriter, r *http.Reques
 		"status":  "success",
 		"message": "Movie updated successfully",
 	}
-
 	err = app.writeJson(w, http.StatusOK, resp, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
