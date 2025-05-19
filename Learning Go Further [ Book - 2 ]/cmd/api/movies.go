@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/sahilrana7582/Learning/internal/data"
@@ -194,4 +195,34 @@ func (app *application) deleteMovieHandler(w http.ResponseWriter, r *http.Reques
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}
+}
+
+func (app *application) getAllMovies(w http.ResponseWriter, r *http.Request) {
+
+	var input struct {
+		Title    string
+		Genres   []string
+		Page     int
+		PageSize int
+		Sort     string
+	}
+
+	qs := r.URL.Query()
+
+	v := validator.New()
+
+	input.Title = app.readString(qs, "title", "")
+	input.Genres, _ = app.readCSV(qs, "genres", nil)
+	input.Page = app.readInt(qs, "page", 1, v)
+	input.PageSize = app.readInt(qs, "page_size", 10, v)
+	input.Sort = app.readString(qs, "sort", "id")
+
+	if !v.Valid() {
+		app.logger.Println("Validation error:", v.Errors)
+		app.errorResponse(w, r, http.StatusUnprocessableEntity, v.Errors)
+		return
+	}
+
+	fmt.Fprintf(w, "Title: %s, Genres: %v, Page: %d, PageSize: %d, Sort: %s\n", input.Title, input.Genres, input.Page, input.PageSize, input.Sort)
+
 }

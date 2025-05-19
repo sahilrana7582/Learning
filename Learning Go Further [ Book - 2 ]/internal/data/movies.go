@@ -124,7 +124,8 @@ func (m *MovieModal) GetAll() ([]*Movie, error) {
 func (m *MovieModal) Update(movie *Movie) error {
 	stmt := `
 		UPDATE movies SET title = $1, release_year = $2, runtime = $3, genre = $4, director = $5, actors = $6,
-		plot = $7, language = $8, country = $9, awards = $10 WHERE id = $11
+		plot = $7, language = $8, country = $9, awards = $10, version = version + 1 WHERE id = $11
+		RETURNING version;
 	`
 
 	genreJSON, err := json.Marshal(movie.Genre)
