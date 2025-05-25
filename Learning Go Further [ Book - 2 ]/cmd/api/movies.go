@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/sahilrana7582/Learning/internal/data"
@@ -223,6 +222,22 @@ func (app *application) getAllMovies(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Fprintf(w, "Title: %s, Genres: %v, Page: %d, PageSize: %d, Sort: %s\n", input.Title, input.Genres, input.Page, input.PageSize, input.Sort)
+	movies, err := app.models.Movies.GetAllMovieWithQuery(input.Title, input.Genres, data.Filters{
+		Page:     input.Page,
+		PageSize: input.PageSize,
+		Sort:     input.Sort,
+	})
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+	err = app.writeJson(w, http.StatusOK, movies, nil)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+	app.logger.Println("Successfully fetched all movies with query parameters")
+	app.logger.Printf("Title: %s, Genres: %v, Page: %d, PageSize: %d, Sort: %s", input.Title, input.Genres, input.Page, input.PageSize, input.Sort)
+	app.logger.Println("Successfully fetched all movies with query parameters")
 
 }

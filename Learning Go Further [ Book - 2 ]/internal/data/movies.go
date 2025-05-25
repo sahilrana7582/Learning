@@ -1,9 +1,14 @@
 package data
 
 import (
+	"context"
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"fmt"
+	"time"
+
+	"github.com/lib/pq"
 )
 
 type Movie struct {
@@ -146,4 +151,69 @@ func (m *MovieModal) Delete(id int64) error {
 	stmt := `DELETE FROM movies WHERE id = $1`
 	_, err := m.DB.Exec(stmt, id)
 	return err
+}
+
+func (m *MovieModal) GetAllMovieWithQuery(title string, genres []string, filters Filters) ([]*Movie, error) {
+	query := `
+		SELECT id, title, release_year, runtime, genre, director, actors, plot, language, country, awards
+		FROM movies
+		WHERE 1=1`
+
+	args := []interface{}{}
+	argID := 1
+
+	if title != "" {
+		query += fmt.Sprintf(" AND title ILIKE $%d", argID)
+		args = append(args, "%"+title+"%")
+		argID++
+	}
+
+	if len(genres) > 0 {
+		query += fmt.Sprintf(" AND genre::jsonb ?| array[$%d]", argID)
+		args = append(args, pq.Array(genres))
+		argID++
+	}
+
+	query += fmt.Sprintf(" ORDER BY %s", filters.Sort)
+	query += fmt.Sprintf(" LIMIT $%d OFFSET $%d", argID, argID+1)
+	args = append(args, filters.Limit(), filters.Offset())
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	rows, err := m.DB.QueryContext(ctx, query, args...)
+	if err != nil {
+		return nil, fmt.Errorf("query error: %w", err)
+	}
+	defer rows.Close()
+
+	var movies []*Movie
+
+	for rows.Next() {
+		var movie Movie
+		var genreJSON, actorsJSON []byte
+
+		if err := rows.Scan(
+			&movie.ID, &movie.Title, &movie.Year, &movie.Runtime,
+			&genreJSON, &movie.Director, &actorsJSON,
+			&movie.Plot, &movie.Language, &movie.Country, &movie.Awards,
+		); err != nil {
+			return nil, fmt.Errorf("row scan error: %w", err)
+		}
+
+		if err := json.Unmarshal(genreJSON, &movie.Genre); err != nil {
+			return nil, fmt.Errorf("genre unmarshal error: %w", err)
+		}
+		if err := json.Unmarshal(actorsJSON, &movie.Actors); err != nil {
+			return nil, fmt.Errorf("actors unmarshal error: %w", err)
+		}
+
+		movies = append(movies, &movie)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("row iteration error: %w", err)
+	}
+
+	return movies, nil
 }
