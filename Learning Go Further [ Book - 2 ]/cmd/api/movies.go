@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/sahilrana7582/Learning/internal/data"
@@ -207,6 +208,8 @@ func (app *application) getAllMovies(w http.ResponseWriter, r *http.Request) {
 	}
 
 	qs := r.URL.Query()
+
+	fmt.Println("Query parameters:", qs)
 
 	v := validator.New()
 

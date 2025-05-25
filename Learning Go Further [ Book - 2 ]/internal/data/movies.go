@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/lib/pq"
@@ -162,22 +163,36 @@ func (m *MovieModal) GetAllMovieWithQuery(title string, genres []string, filters
 	args := []interface{}{}
 	argID := 1
 
+	// Case-insensitive title search
 	if title != "" {
 		query += fmt.Sprintf(" AND title ILIKE $%d", argID)
 		args = append(args, "%"+title+"%")
 		argID++
 	}
 
+	// Genre filter (assuming genre is a jsonb column)
 	if len(genres) > 0 {
-		query += fmt.Sprintf(" AND genre::jsonb ?| array[$%d]", argID)
+		query += fmt.Sprintf(`
+			AND EXISTS (
+				SELECT 1 FROM jsonb_array_elements_text(genre) AS g
+				WHERE LOWER(g.value) = ANY($%d)
+			)`, argID)
+
+		for i, g := range genres {
+			genres[i] = strings.ToLower(g)
+		}
 		args = append(args, pq.Array(genres))
 		argID++
 	}
 
+	// Sorting (use safe validation on filters.Sort if it comes from user input)
 	query += fmt.Sprintf(" ORDER BY %s", filters.Sort)
+
+	// Pagination
 	query += fmt.Sprintf(" LIMIT $%d OFFSET $%d", argID, argID+1)
 	args = append(args, filters.Limit(), filters.Offset())
 
+	// Database query with context
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -204,6 +219,7 @@ func (m *MovieModal) GetAllMovieWithQuery(title string, genres []string, filters
 		if err := json.Unmarshal(genreJSON, &movie.Genre); err != nil {
 			return nil, fmt.Errorf("genre unmarshal error: %w", err)
 		}
+
 		if err := json.Unmarshal(actorsJSON, &movie.Actors); err != nil {
 			return nil, fmt.Errorf("actors unmarshal error: %w", err)
 		}
