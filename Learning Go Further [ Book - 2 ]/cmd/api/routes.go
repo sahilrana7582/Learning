@@ -17,6 +17,10 @@ func (app *application) routes() *httprouter.Router {
 	router.HandlerFunc(http.MethodPatch, "/v1/movies/:id", app.updateMovieHandler)
 	router.HandlerFunc(http.MethodGet, "/lala", app.getAllMovies)
 	router.HandlerFunc(http.MethodDelete, "/v1/movies/:id", app.deleteMovieHandler)
+	router.HandlerFunc(http.MethodGet, "/test", func(w http.ResponseWriter, r *http.Request) {
+		panic("Simulated panic for testing recovery middleware")
+	},
+	)
 
 	return router
 }
