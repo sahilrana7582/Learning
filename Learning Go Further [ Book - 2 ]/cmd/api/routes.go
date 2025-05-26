@@ -2,6 +2,7 @@ package main
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/julienschmidt/httprouter"
 )
@@ -18,9 +19,14 @@ func (app *application) routes() *httprouter.Router {
 	router.HandlerFunc(http.MethodGet, "/lala", app.getAllMovies)
 	router.HandlerFunc(http.MethodDelete, "/v1/movies/:id", app.deleteMovieHandler)
 	router.HandlerFunc(http.MethodGet, "/test", func(w http.ResponseWriter, r *http.Request) {
-		panic("Simulated panic for testing recovery middleware")
+		time.Sleep(10 * time.Second)
+		w.Write([]byte("Test endpoint reached"))
 	},
 	)
+
+	// User registration route
+	router.HandlerFunc(http.MethodPost, "/v1/users/register", app.registerUserHandler)
+	router.HandlerFunc(http.MethodPost, "/v1/users", app.getUserByEmailHandler)
 
 	return router
 }

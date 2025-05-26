@@ -159,3 +159,21 @@ func ValidateMovieInput(v *Validator, movie data.Movie) *Validator {
 
 	return v
 }
+
+func ValidateEmail(email *string) bool {
+	emailRegex := regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)
+	return emailRegex.MatchString(*email) && NotBlank(*email) && MinLength(*email, 5) && MaxLength(*email, 254)
+}
+
+func ValidatePassword(password *string) bool {
+	return NotBlank(*password) && MinLength(*password, 4)
+}
+
+func ValidateUserInput(v *Validator, name string, email *string, password *string) *Validator {
+	v.Check(NotBlank(name), "name", "must not be blank")
+	v.Check(MinLength(name, 2), "name", "must be at least 2 characters long")
+	v.Check(ValidateEmail(email), "email", "must be a valid email address")
+	v.Check(ValidatePassword(password), "password", "must be at least 4 characters long")
+
+	return v
+}
