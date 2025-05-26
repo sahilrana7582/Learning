@@ -16,12 +16,12 @@ type User struct {
 	CreatedAt time.Time `json:"created_at"`
 	Name      string    `json:"name"`
 	Email     string    `json:"email"`
-	Password  string    `json:"-"`
+	Password  Password  `json:"-"`
 	Activated bool      `json:"activated"`
 	Version   int       `json:"version"`
 }
 
-type password struct {
+type Password struct {
 	plaintext *string
 	hash      []byte
 }
@@ -30,7 +30,7 @@ var (
 	ErrDuplicateEmail = errors.New("duplicate email")
 )
 
-func (p *password) Set(passwordText string) error {
+func (p *Password) Set(passwordText string) error {
 
 	hash, err := bcrypt.GenerateFromPassword([]byte(passwordText), 4)
 
@@ -43,7 +43,7 @@ func (p *password) Set(passwordText string) error {
 	return nil
 }
 
-func (p *password) Compare(passwordText string) (bool, error) {
+func (p *Password) Compare(passwordText string) (bool, error) {
 	err := bcrypt.CompareHashAndPassword(p.hash, []byte(passwordText))
 
 	if err != nil {
@@ -72,7 +72,7 @@ func (u *UserModel) Insert(user *User) error {
 	args := []interface{}{
 		user.Name,
 		user.Email,
-		user.Password,
+		user.Password.hash,
 		user.Activated,
 	}
 
@@ -109,7 +109,7 @@ func (u *UserModel) GetByEmail(email string) (*User, error) {
 		&user.CreatedAt,
 		&user.Name,
 		&user.Email,
-		&user.Password,
+		&user.Password.hash,
 		&user.Activated,
 		&user.Version,
 	)

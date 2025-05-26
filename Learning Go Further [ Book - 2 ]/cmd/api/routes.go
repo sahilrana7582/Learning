@@ -27,6 +27,8 @@ func (app *application) routes() *httprouter.Router {
 	// User registration route
 	router.HandlerFunc(http.MethodPost, "/v1/users/register", app.registerUserHandler)
 	router.HandlerFunc(http.MethodPost, "/v1/users", app.getUserByEmailHandler)
+	// Authentication route
+	router.HandlerFunc(http.MethodPost, "/v1/users/auth", app.createAuthTokenHandler)
 
 	return router
 }

@@ -177,3 +177,10 @@ func ValidateUserInput(v *Validator, name string, email *string, password *strin
 
 	return v
 }
+
+func ValidateCredentials(v *Validator, email string, password string) *Validator {
+	v.Check(ValidateEmail(&email), "email", "must be a valid email address")
+	v.Check(ValidatePassword(&password), "password", "must be at least 4 characters long")
+
+	return v
+}

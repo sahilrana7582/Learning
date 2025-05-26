@@ -31,10 +31,16 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
+	err = userData.Password.Set(input.Password)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+
 	userData = data.User{
 		Name:      input.Name,
 		Email:     input.Email,
-		Password:  input.Password,
+		Password:  userData.Password,
 		Activated: true,
 	}
 
