@@ -1,6 +1,7 @@
 package main
 
 import (
+	"expvar"
 	"net/http"
 	"time"
 
@@ -23,6 +24,7 @@ func (app *application) routes() *httprouter.Router {
 		w.Write([]byte("Test endpoint reached"))
 	},
 	)
+	router.Handler(http.MethodGet, "/debug/vars", expvar.Handler())
 
 	// User registration route
 	router.HandlerFunc(http.MethodPost, "/v1/users/register", app.registerUserHandler)
